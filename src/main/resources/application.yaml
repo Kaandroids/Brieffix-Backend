@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: briefix
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/briefix}
+    username: ${SPRING_DATASOURCE_USERNAME:briefix}
+    password: ${SPRING_DATASOURCE_PASSWORD:briefix}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
+      password: ${SPRING_REDIS_PASSWORD:}
+
+  thymeleaf:
+    check-template-location: true
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:3cfa76ef14937c1c0ea519f8fc057a80fcd04a7420f8e8bcd0a7567c272e007b}
+    access-token-expiration-ms: ${JWT_ACCESS_EXPIRATION_MS:900000}       # 15 minutes
+    refresh-token-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}  # 7 days
