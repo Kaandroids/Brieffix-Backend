@@ -235,7 +235,6 @@ public class ProfileEntity {
      * Logo is managed through dedicated upload/delete endpoints and is never modified
      * by the standard create/update profile flow.
      */
-    @Lob
     @Column(name = "logo", columnDefinition = "bytea")
     private byte[] logo;
 
