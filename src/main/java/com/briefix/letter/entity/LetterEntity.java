@@ -123,6 +123,14 @@ public class LetterEntity {
     private String pdfUrl;
 
     /**
+     * UUID of the sender profile used when generating this letter.
+     * Stored to allow re-loading the current logo when re-rendering the PDF.
+     * Nullable for backward compatibility with letters saved before this field was added.
+     */
+    @Column(name = "profile_id")
+    private UUID profileId;
+
+    /**
      * Timestamp recording when this letter entity was first persisted.  Set
      * automatically by the {@link #onCreate()} lifecycle callback; never
      * modified afterwards ({@code updatable = false}).
@@ -208,6 +216,7 @@ public class LetterEntity {
      *         externally
      */
     public String getPdfUrl() { return pdfUrl; }
+    public UUID getProfileId() { return profileId; }
 
     /**
      * Returns the timestamp at which this letter was first persisted.
@@ -285,6 +294,7 @@ public class LetterEntity {
      *               reference
      */
     public void setPdfUrl(String pdfUrl) { this.pdfUrl = pdfUrl; }
+    public void setProfileId(UUID profileId) { this.profileId = profileId; }
 
     /**
      * Sets the creation timestamp of this letter.  In normal operation this

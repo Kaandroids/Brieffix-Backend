@@ -86,7 +86,8 @@ public class LetterMapper {
                 entity.getRecipientSnapshot(),
                 entity.getTemplate(),
                 entity.getPdfUrl(),
-                entity.getCreatedAt()
+                entity.getCreatedAt(),
+                entity.getProfileId()
         );
     }
 
@@ -120,6 +121,7 @@ public class LetterMapper {
         entity.setTemplate(letter.template());
         entity.setPdfUrl(letter.pdfUrl());
         entity.setCreatedAt(letter.createdAt());
+        entity.setProfileId(letter.profileId());
         return entity;
     }
 }

@@ -67,5 +67,6 @@ public record Letter(
         RecipientSnapshot recipientSnapshot,
         LetterTemplate template,
         String pdfUrl,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        UUID profileId
 ) {}

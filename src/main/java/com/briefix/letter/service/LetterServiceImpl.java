@@ -208,7 +208,8 @@ public class LetterServiceImpl implements LetterService {
                 recipient,
                 req.template(),
                 null,
-                null
+                null,
+                req.profileId()
         );
         return letterMapper.toDto(letterRepository.save(letter, user.id()));
     }
@@ -255,7 +256,23 @@ public class LetterServiceImpl implements LetterService {
         if (!letter.userId().equals(user.id())) {
             throw new AccessDeniedException("Access denied to letter: " + id);
         }
-        byte[] bytes = renderPdf(letter.template(), letter.senderSnapshot(), letter.recipientSnapshot(),
+        SenderSnapshot sender = letter.senderSnapshot();
+        if (sender.logoBase64() == null && letter.profileId() != null) {
+            String reloadedLogo = profileRepository.findLogoById(letter.profileId())
+                    .flatMap(logoBytes -> profileRepository.findLogoContentTypeById(letter.profileId())
+                            .map(ct -> "data:" + ct + ";base64," + Base64.getEncoder().encodeToString(logoBytes)))
+                    .orElse(null);
+            if (reloadedLogo != null) {
+                sender = new SenderSnapshot(sender.type(), sender.profileLabel(), sender.salutation(),
+                        sender.title(), sender.firstName(), sender.lastName(), sender.companyName(),
+                        sender.department(), sender.street(), sender.streetNumber(), sender.postalCode(),
+                        sender.city(), sender.country(), sender.phone(), sender.fax(), sender.email(),
+                        sender.website(), sender.vatId(), sender.taxNumber(), sender.managingDirector(),
+                        sender.registerCourt(), sender.registerNumber(), sender.iban(), sender.bic(),
+                        sender.bankName(), sender.contactPerson(), reloadedLogo);
+            }
+        }
+        byte[] bytes = renderPdf(letter.template(), sender, letter.recipientSnapshot(),
                 letter.title(), letter.body(), letter.letterDate());
         return new PdfResult(bytes, letter.title());
     }

@@ -57,6 +57,14 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Google Cloud SQL Socket Factory — enables IAM-authenticated connections
+             from Cloud Run to Cloud SQL without requiring authorized network entries. -->
+        <dependency>
+            <groupId>com.google.cloud.sql</groupId>
+            <artifactId>postgres-socket-factory</artifactId>
+            <version>1.19.1</version>
+        </dependency>
+
         <!-- Redis -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

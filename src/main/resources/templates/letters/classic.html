@@ -64,6 +64,8 @@
     .message-title { float: left; font-weight: bold; font-size: 13pt; }
     .content-header { width: 100%; overflow: hidden; margin-bottom: 5mm; }
     .message-content { white-space: pre-wrap; }
+    .logo-box { position: absolute; top: 10mm; left: 0; width: 210mm; text-align: center; }
+    .logo-img { max-height: 20mm; max-width: 60mm; }
     .footer { position: running(footer); width: 100%; }
     .footer-business-details {
       text-align: center; font-size: 6pt; padding-top: 1mm;
@@ -79,8 +81,8 @@
 </head>
 <body>
 
-<div th:if="${logoImage}" style="position: absolute; top: 10mm; left: 0; right: 0; text-align: center;">
-  <img th:src="${logoImage}" alt="Logo" style="max-height: 20mm; max-width: 60mm;" />
+<div th:if="${logoImage}" class="logo-box">
+  <img th:src="${logoImage}" alt="Logo" class="logo-img" />
 </div>
 
 <div class="footer">
