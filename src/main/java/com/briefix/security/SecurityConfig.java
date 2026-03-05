@@ -54,6 +54,8 @@ public class SecurityConfig {
      */
     private final UserDetailsService userDetailsService;
 
+    private final RateLimitFilter rateLimitFilter;
+
     /**
      * Constructs a new {@code SecurityConfig} with the required security collaborators.
      *
@@ -61,10 +63,13 @@ public class SecurityConfig {
      *                           Bearer tokens; must not be {@code null}
      * @param userDetailsService the service that loads {@link org.springframework.security.core.userdetails.UserDetails}
      *                           by email for credential verification; must not be {@code null}
+     * @param rateLimitFilter    the filter that enforces per-IP rate limits on auth endpoints
      */
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter, UserDetailsService userDetailsService) {
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter, UserDetailsService userDetailsService,
+                          RateLimitFilter rateLimitFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.userDetailsService = userDetailsService;
+        this.rateLimitFilter = rateLimitFilter;
     }
 
     /**
@@ -99,6 +104,7 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authenticationProvider(authenticationProvider())
+                .addFilterBefore(rateLimitFilter, JwtAuthFilter.class)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

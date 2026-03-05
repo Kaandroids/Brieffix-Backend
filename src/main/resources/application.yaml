@@ -30,6 +30,14 @@ spring:
     mode: HTML
 
 app:
+  rate-limit:
+    login:
+      max-requests: 10     # max login attempts per IP per window
+      window-seconds: 60   # rolling window duration in seconds
+    register:
+      max-requests: 5      # max registration attempts per IP per window
+      window-seconds: 60
+
   jwt:
     secret: ${JWT_SECRET:3cfa76ef14937c1c0ea519f8fc057a80fcd04a7420f8e8bcd0a7567c272e007b}
     access-token-expiration-ms: ${JWT_ACCESS_EXPIRATION_MS:900000}       # 15 minutes
