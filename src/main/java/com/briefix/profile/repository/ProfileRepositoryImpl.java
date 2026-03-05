@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * PostgreSQL-backed implementation of the {@link ProfileRepository} domain port.
@@ -138,5 +139,63 @@ public class ProfileRepositoryImpl implements ProfileRepository {
     @Override
     public void deleteById(UUID id) {
         jpaRepository.deleteById(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Loads the entity by ID, sets the logo bytes and content type, then saves.
+     * If no entity exists for the given ID, the method completes silently.</p>
+     */
+    @Override
+    @Transactional
+    public void saveLogo(UUID id, byte[] bytes, String contentType) {
+        jpaRepository.findById(id).ifPresent(entity -> {
+            entity.setLogo(bytes);
+            entity.setLogoContentType(contentType);
+            jpaRepository.save(entity);
+        });
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Loads the entity by ID and returns the logo bytes wrapped in an
+     * {@link Optional}, or empty if the entity has no logo.</p>
+     */
+    @Override
+    public Optional<byte[]> findLogoById(UUID id) {
+        return jpaRepository.findById(id)
+                .filter(e -> e.getLogo() != null)
+                .map(e -> e.getLogo());
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Loads the entity by ID and returns the logo content type wrapped in an
+     * {@link Optional}, or empty if the entity has no logo.</p>
+     */
+    @Override
+    public Optional<String> findLogoContentTypeById(UUID id) {
+        return jpaRepository.findById(id)
+                .filter(e -> e.getLogoContentType() != null)
+                .map(e -> e.getLogoContentType());
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Loads the entity by ID and clears the logo and content type fields.
+     * Completes silently if the profile does not exist.</p>
+     */
+    @Override
+    @Transactional
+    public void deleteLogo(UUID id) {
+        jpaRepository.findById(id).ifPresent(entity -> {
+            entity.setLogo(null);
+            entity.setLogoContentType(null);
+            jpaRepository.save(entity);
+        });
     }
 }

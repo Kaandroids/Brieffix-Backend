@@ -79,10 +79,13 @@
 </head>
 <body>
 
+<div th:if="${logoImage}" style="position: absolute; top: 10mm; left: 0; right: 0; text-align: center;">
+  <img th:src="${logoImage}" alt="Logo" style="max-height: 20mm; max-width: 60mm;" />
+</div>
+
 <div class="footer">
-  <th:block th:if="${!#strings.isEmpty(sender.contactPerson) or !#strings.isEmpty(sender.registerCourt) or !#strings.isEmpty(sender.registerNumber) or !#strings.isEmpty(sender.managingDirector) or !#strings.isEmpty(sender.taxNumber) or !#strings.isEmpty(sender.vatId)}">
+  <th:block th:if="${!#strings.isEmpty(sender.registerCourt) or !#strings.isEmpty(sender.registerNumber) or !#strings.isEmpty(sender.managingDirector) or !#strings.isEmpty(sender.taxNumber) or !#strings.isEmpty(sender.vatId)}">
     <div class="footer-business-details">
-      <span th:if="${!#strings.isEmpty(sender.contactPerson)}" th:text="|Inh.: ${sender.contactPerson}|"></span>
       <span th:if="${!#strings.isEmpty(sender.street)}" th:text="${(sender.street ?: '') + ' ' + (sender.streetNumber ?: '') + ', ' + (sender.postalCode ?: '') + ' ' + (sender.city ?: '')}"></span>
       <span th:if="${!#strings.isEmpty(sender.registerCourt)}" th:text="${sender.registerCourt}"></span>
       <span th:if="${!#strings.isEmpty(sender.registerNumber)}" th:text="${sender.registerNumber}"></span>

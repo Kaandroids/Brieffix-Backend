@@ -230,6 +230,23 @@ public class ProfileEntity {
     private String contactPerson;
 
     /**
+     * Binary content of the profile logo image, stored as a PostgreSQL {@code bytea} column.
+     * {@code null} when no logo has been uploaded for this profile.
+     * Logo is managed through dedicated upload/delete endpoints and is never modified
+     * by the standard create/update profile flow.
+     */
+    @Lob
+    @Column(name = "logo", columnDefinition = "bytea")
+    private byte[] logo;
+
+    /**
+     * MIME type of the stored logo image (e.g. {@code "image/png"}, {@code "image/svg+xml"}).
+     * Always populated when {@link #logo} is non-null; {@code null} otherwise.
+     */
+    @Column(name = "logo_content_type", length = 50)
+    private String logoContentType;
+
+    /**
      * The timestamp at which this profile was first created. Set automatically by the
      * {@link #onCreate()} lifecycle callback on insert and is non-updatable to preserve
      * an accurate audit trail. Never set by the client.
@@ -668,6 +685,34 @@ public class ProfileEntity {
      * @param contactPerson the contact person name to assign, or {@code null} to clear it
      */
     public void setContactPerson(String contactPerson) { this.contactPerson = contactPerson; }
+
+    /**
+     * Returns the raw bytes of the profile logo image, or {@code null} if no logo has been uploaded.
+     *
+     * @return the logo byte array, or {@code null}
+     */
+    public byte[] getLogo() { return logo; }
+
+    /**
+     * Sets the raw bytes of the profile logo image.
+     *
+     * @param logo the logo byte array, or {@code null} to clear the logo
+     */
+    public void setLogo(byte[] logo) { this.logo = logo; }
+
+    /**
+     * Returns the MIME content type of the stored logo (e.g. {@code "image/png"}).
+     *
+     * @return the content type string, or {@code null} if no logo is stored
+     */
+    public String getLogoContentType() { return logoContentType; }
+
+    /**
+     * Sets the MIME content type of the logo image.
+     *
+     * @param logoContentType the content type to assign, or {@code null} to clear it
+     */
+    public void setLogoContentType(String logoContentType) { this.logoContentType = logoContentType; }
 
     /**
      * Sets the creation timestamp for this profile. Normally managed automatically

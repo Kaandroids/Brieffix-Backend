@@ -387,6 +387,10 @@ public class LetterServiceImpl implements LetterService {
      *         field values
      */
     private SenderSnapshot buildSenderSnapshot(Profile p) {
+        String logoBase64 = profileRepository.findLogoById(p.id())
+                .flatMap(bytes -> profileRepository.findLogoContentTypeById(p.id())
+                        .map(ct -> "data:" + ct + ";base64," + Base64.getEncoder().encodeToString(bytes)))
+                .orElse(null);
         return new SenderSnapshot(
                 p.type().name(),
                 p.profileLabel(),
@@ -413,7 +417,8 @@ public class LetterServiceImpl implements LetterService {
                 p.iban(),
                 p.bic(),
                 p.bankName(),
-                p.contactPerson()
+                p.contactPerson(),
+                logoBase64
         );
     }
 
@@ -490,6 +495,7 @@ public class LetterServiceImpl implements LetterService {
         ctx.setVariable("date", letterDate.format(DATE_FORMATTER));
         String decorBase64 = loadDecorImageBase64();
         ctx.setVariable("decorImage", decorBase64 != null ? "data:image/png;base64," + decorBase64 : null);
+        ctx.setVariable("logoImage", sender.logoBase64());
 
         String html = templateEngine.process("letters/" + template.name().toLowerCase(), ctx);
 

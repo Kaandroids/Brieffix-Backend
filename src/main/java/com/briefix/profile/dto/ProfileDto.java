@@ -52,6 +52,8 @@ import java.util.UUID;
  * @param email             Business contact email address displayed on documents.
  * @param contactPerson     Name of the designated contact person for organization profiles.
  * @param createdAt         Server-assigned timestamp of when this profile was first created.
+ * @param hasLogo           {@code true} if a logo image has been uploaded for this profile.
+ *                          Logo bytes are served separately via {@code GET /api/v1/profiles/{id}/logo}.
  */
 public record ProfileDto(
         UUID id,
@@ -83,5 +85,6 @@ public record ProfileDto(
         String fax,
         String email,
         String contactPerson,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        boolean hasLogo
 ) {}

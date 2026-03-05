@@ -62,6 +62,9 @@ package com.briefix.letter.model;
  * @param bankName         name of the sender's bank; may be {@code null}
  * @param contactPerson    name of the primary contact person at the sender's
  *                         company; may be {@code null}
+ * @param logoBase64       the sender's logo as a Base64 data URI (e.g.
+ *                         {@code "data:image/png;base64,..."}) captured at letter
+ *                         generation time; {@code null} if no logo was uploaded
  */
 public record SenderSnapshot(
         String type,
@@ -89,5 +92,6 @@ public record SenderSnapshot(
         String iban,
         String bic,
         String bankName,
-        String contactPerson
+        String contactPerson,
+        String logoBase64
 ) {}

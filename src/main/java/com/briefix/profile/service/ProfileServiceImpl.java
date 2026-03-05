@@ -11,8 +11,11 @@ import com.briefix.user.exception.UserNotFoundException;
 import com.briefix.user.repository.UserRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -163,7 +166,8 @@ public class ProfileServiceImpl implements ProfileService {
                 req.fax(),
                 req.email(),
                 req.contactPerson(),
-                null
+                null,
+                false
         );
         var saved = profileRepository.save(profile, user.id());
         return profileMapper.toDto(saved);
@@ -220,7 +224,8 @@ public class ProfileServiceImpl implements ProfileService {
                 req.fax(),
                 req.email(),
                 req.contactPerson(),
-                existing.createdAt()
+                existing.createdAt(),
+                existing.hasLogo()
         );
         var saved = profileRepository.save(updated, existing.userId());
         return profileMapper.toDto(saved);
@@ -260,6 +265,49 @@ public class ProfileServiceImpl implements ProfileService {
      * @throws UserNotFoundException  if no user account exists for the given email
      * @throws AccessDeniedException if the authenticated user does not own the given profile
      */
+    private static final Set<String> ALLOWED_MIME_TYPES = Set.of(
+            "image/png", "image/jpeg", "image/x-icon", "image/vnd.microsoft.icon", "image/svg+xml"
+    );
+    private static final long MAX_LOGO_BYTES = 2 * 1024 * 1024; // 2 MB
+
+    @Override
+    public void uploadLogo(UUID id, MultipartFile file, String email) {
+        var profile = profileRepository.findById(id)
+                .orElseThrow(() -> new ProfileNotFoundException(id));
+        checkOwnership(profile, email);
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType)) {
+            throw new IllegalArgumentException("Unsupported file type: " + contentType);
+        }
+        if (file.getSize() > MAX_LOGO_BYTES) {
+            throw new IllegalArgumentException("Logo must not exceed 2 MB");
+        }
+        try {
+            profileRepository.saveLogo(id, file.getBytes(), contentType);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read uploaded file", e);
+        }
+    }
+
+    @Override
+    public ProfileService.LogoData getLogo(UUID id, String email) {
+        var profile = profileRepository.findById(id)
+                .orElseThrow(() -> new ProfileNotFoundException(id));
+        checkOwnership(profile, email);
+        byte[] bytes = profileRepository.findLogoById(id)
+                .orElseThrow(() -> new IllegalStateException("No logo for profile: " + id));
+        String contentType = profileRepository.findLogoContentTypeById(id).orElse("application/octet-stream");
+        return new ProfileService.LogoData(bytes, contentType);
+    }
+
+    @Override
+    public void deleteLogo(UUID id, String email) {
+        var profile = profileRepository.findById(id)
+                .orElseThrow(() -> new ProfileNotFoundException(id));
+        checkOwnership(profile, email);
+        profileRepository.deleteLogo(id);
+    }
+
     private void checkOwnership(Profile profile, String email) {
         var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));

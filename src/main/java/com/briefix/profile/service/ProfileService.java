@@ -3,6 +3,7 @@ package com.briefix.profile.service;
 import com.briefix.profile.dto.CreateProfileRequest;
 import com.briefix.profile.dto.ProfileDto;
 import com.briefix.profile.dto.UpdateProfileRequest;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -101,4 +102,44 @@ public interface ProfileService {
      * @throws org.springframework.security.access.AccessDeniedException if the profile is owned by a different user
      */
     void delete(UUID id, String email);
+
+    /**
+     * Uploads and stores a logo image for the given profile.
+     *
+     * <p>Accepts PNG, JPEG, ICO, and SVG files up to 2 MB.
+     * Ownership is verified before saving.</p>
+     *
+     * @param id    the UUID of the target profile
+     * @param file  the uploaded image file
+     * @param email the authenticated user's email for ownership verification
+     * @throws com.briefix.profile.exception.ProfileNotFoundException if no profile exists with the given ID
+     * @throws org.springframework.security.access.AccessDeniedException if the profile is owned by a different user
+     * @throws IllegalArgumentException if the file type is unsupported or the file exceeds 2 MB
+     */
+    void uploadLogo(UUID id, MultipartFile file, String email);
+
+    /**
+     * Returns the raw logo bytes and content type for the given profile.
+     *
+     * @param id    the UUID of the profile
+     * @param email the authenticated user's email for ownership verification
+     * @return a {@link LogoData} record containing the bytes and MIME type
+     * @throws com.briefix.profile.exception.ProfileNotFoundException if no profile exists with the given ID
+     * @throws org.springframework.security.access.AccessDeniedException if the profile is owned by a different user
+     * @throws IllegalStateException if the profile has no logo
+     */
+    LogoData getLogo(UUID id, String email);
+
+    /**
+     * Removes the logo from the given profile.
+     *
+     * @param id    the UUID of the profile
+     * @param email the authenticated user's email for ownership verification
+     * @throws com.briefix.profile.exception.ProfileNotFoundException if no profile exists with the given ID
+     * @throws org.springframework.security.access.AccessDeniedException if the profile is owned by a different user
+     */
+    void deleteLogo(UUID id, String email);
+
+    /** Holds the raw bytes and MIME content type of a profile logo. */
+    record LogoData(byte[] bytes, String contentType) {}
 }

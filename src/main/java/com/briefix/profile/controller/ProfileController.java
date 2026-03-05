@@ -5,9 +5,12 @@ import com.briefix.profile.dto.ProfileDto;
 import com.briefix.profile.dto.UpdateProfileRequest;
 import com.briefix.profile.service.ProfileService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -150,5 +153,27 @@ public class ProfileController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID id, Authentication authentication) {
         profileService.delete(id, authentication.getName());
+    }
+
+    @PostMapping(value = "/{id}/logo", consumes = "multipart/form-data")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void uploadLogo(@PathVariable UUID id,
+                           @RequestParam("file") MultipartFile file,
+                           Authentication authentication) {
+        profileService.uploadLogo(id, file, authentication.getName());
+    }
+
+    @GetMapping("/{id}/logo")
+    public ResponseEntity<byte[]> getLogo(@PathVariable UUID id, Authentication authentication) {
+        var logo = profileService.getLogo(id, authentication.getName());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, logo.contentType())
+                .body(logo.bytes());
+    }
+
+    @DeleteMapping("/{id}/logo")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteLogo(@PathVariable UUID id, Authentication authentication) {
+        profileService.deleteLogo(id, authentication.getName());
     }
 }

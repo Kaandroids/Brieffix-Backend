@@ -71,7 +71,8 @@ public class ProfileMapper {
                 profile.fax(),
                 profile.email(),
                 profile.contactPerson(),
-                profile.createdAt()
+                profile.createdAt(),
+                profile.hasLogo()
         );
     }
 
@@ -119,7 +120,8 @@ public class ProfileMapper {
                 entity.getFax(),
                 entity.getEmail(),
                 entity.getContactPerson(),
-                entity.getCreatedAt()
+                entity.getCreatedAt(),
+                entity.getLogo() != null
         );
     }
 

@@ -82,4 +82,37 @@ public interface ProfileRepository {
      * @param id the UUID of the profile to delete; must not be {@code null}
      */
     void deleteById(UUID id);
+
+    /**
+     * Persists a logo image for the profile identified by the given UUID.
+     *
+     * @param id          the UUID of the target profile; must not be {@code null}
+     * @param bytes       the raw binary content of the logo image; must not be {@code null}
+     * @param contentType the MIME type of the image (e.g. {@code "image/png"}); must not be {@code null}
+     */
+    void saveLogo(UUID id, byte[] bytes, String contentType);
+
+    /**
+     * Returns the raw bytes of the logo image for the specified profile, if a logo exists.
+     *
+     * @param id the UUID of the profile whose logo should be retrieved; must not be {@code null}
+     * @return an {@link Optional} containing the logo bytes, or {@link Optional#empty()} if none
+     */
+    Optional<byte[]> findLogoById(UUID id);
+
+    /**
+     * Returns the MIME content type of the logo image for the specified profile, if present.
+     *
+     * @param id the UUID of the profile; must not be {@code null}
+     * @return an {@link Optional} containing the content type string, or empty if no logo is stored
+     */
+    Optional<String> findLogoContentTypeById(UUID id);
+
+    /**
+     * Removes the logo from the profile identified by the given UUID by setting
+     * the logo and content type fields to {@code null}.
+     *
+     * @param id the UUID of the profile whose logo should be removed; must not be {@code null}
+     */
+    void deleteLogo(UUID id);
 }
