@@ -109,17 +109,23 @@
 
 <div class="address-box">
   <span class="sender-line"
-        th:text="${(sender.type == 'ORGANIZATION' ? (sender.companyName ?: '') : ((sender.firstName ?: '') + ' ' + (sender.lastName ?: ''))) + ' • ' + (sender.street ?: '') + ' ' + (sender.streetNumber ?: '') + ' • ' + (sender.postalCode ?: '') + ' ' + (sender.city ?: '')}">
+        th:text="${(sender.type == 'ORGANIZATION' ? (sender.companyName ?: '') : ((!#strings.isEmpty(sender.salutation) ? sender.salutation + ' ' : '') + (sender.firstName ?: '') + ' ' + (sender.lastName ?: ''))) + ' • ' + (sender.street ?: '') + ' ' + (sender.streetNumber ?: '') + ' • ' + (sender.postalCode ?: '') + ' ' + (sender.city ?: '')}">
   </span>
   <div class="recipient-address">
-    <th:block th:if="${!#strings.isEmpty(recipient.companyName)}">
-      <span style="font-weight:bold;" th:text="${recipient.companyName}"></span><br/>
+    <!-- Organization: company name + contact person only -->
+    <th:block th:if="${recipient.type == 'ORGANIZATION'}">
+      <th:block th:if="${!#strings.isEmpty(recipient.companyName)}">
+        <span style="font-weight:bold;" th:text="${recipient.companyName}"></span><br/>
+      </th:block>
+      <th:block th:if="${!#strings.isEmpty(recipient.contactPerson)}">
+        <span th:text="${(!#strings.isEmpty(recipient.salutation) ? recipient.salutation + ' ' : '') + recipient.contactPerson}"></span><br/>
+      </th:block>
     </th:block>
-    <th:block th:if="${!#strings.isEmpty(recipient.contactPerson)}">
-      <span th:text="${(!#strings.isEmpty(recipient.salutation) ? recipient.salutation + ' ' : '') + recipient.contactPerson}"></span><br/>
-    </th:block>
-    <th:block th:if="${!#strings.isEmpty(recipient.firstName) or !#strings.isEmpty(recipient.lastName)}">
-      <span th:text="${(!#strings.isEmpty(recipient.salutation) ? recipient.salutation + ' ' : '') + (recipient.firstName ?: '') + ' ' + (recipient.lastName ?: '')}"></span><br/>
+    <!-- Individual: salutation + personal name only -->
+    <th:block th:if="${recipient.type != 'ORGANIZATION'}">
+      <th:block th:if="${!#strings.isEmpty(recipient.firstName) or !#strings.isEmpty(recipient.lastName)}">
+        <span th:text="${(!#strings.isEmpty(recipient.salutation) ? recipient.salutation + ' ' : '') + (recipient.firstName ?: '') + ' ' + (recipient.lastName ?: '')}"></span><br/>
+      </th:block>
     </th:block>
     <th:block th:if="${!#strings.isEmpty(recipient.street)}">
       <span th:text="${recipient.street + ' ' + (recipient.streetNumber ?: '')}"></span><br/>
@@ -134,14 +140,17 @@
 </div>
 
 <div class="sender-box-right">
-  <strong th:text="${sender.type == 'ORGANIZATION' ? (sender.companyName ?: '') : ((sender.firstName ?: '') + ' ' + (sender.lastName ?: ''))}"></strong><br/>
+  <strong th:text="${sender.type == 'ORGANIZATION' ? (sender.companyName ?: '') : ((!#strings.isEmpty(sender.salutation) ? sender.salutation + ' ' : '') + (sender.firstName ?: '') + ' ' + (sender.lastName ?: ''))}"></strong><br/>
   <span th:if="${!#strings.isEmpty(sender.street)}" th:text="${sender.street + ' ' + (sender.streetNumber ?: '')}"></span><br th:if="${!#strings.isEmpty(sender.street)}"/>
   <span th:if="${!#strings.isEmpty(sender.postalCode)}" th:text="${(sender.postalCode ?: '') + ' ' + (sender.city ?: '')}"></span><br th:if="${!#strings.isEmpty(sender.postalCode)}"/>
   <th:block th:if="${!#strings.isEmpty(sender.phone)}">Tel: <span th:text="${sender.phone}"></span><br/></th:block>
   <th:block th:if="${!#strings.isEmpty(sender.fax)}">Fax: <span th:text="${sender.fax}"></span><br/></th:block>
   <th:block th:if="${!#strings.isEmpty(sender.email)}">E-Mail: <span th:text="${sender.email}"></span><br/></th:block>
   <th:block th:if="${!#strings.isEmpty(sender.website)}">Web: <span th:text="${sender.website}"></span><br/></th:block>
-  <th:block th:if="${!#strings.isEmpty(sender.contactPerson)}"><strong th:text="${(!#strings.isEmpty(sender.salutation) ? sender.salutation + ' ' : '') + sender.contactPerson}"></strong><br/></th:block>
+  <!-- Contact person only shown for organization senders -->
+  <th:block th:if="${sender.type == 'ORGANIZATION' and !#strings.isEmpty(sender.contactPerson)}">
+    <strong th:text="${(!#strings.isEmpty(sender.salutation) ? sender.salutation + ' ' : '') + sender.contactPerson}"></strong><br/>
+  </th:block>
 </div>
 
 <div class="content">

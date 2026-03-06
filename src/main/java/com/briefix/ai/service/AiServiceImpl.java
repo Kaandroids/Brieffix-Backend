@@ -117,9 +117,10 @@ public class AiServiceImpl implements AiService {
     }
 
     private String buildPrompt(String description, String senderInfo, String recipientInfo) {
+        log.info("Building prompt for description: '{}'", description);
         StringBuilder prompt = new StringBuilder();
         prompt.append("Du bist ein professioneller Briefschreiber für deutsche Geschäftsbriefe nach DIN 5008.\n");
-        prompt.append("Erstelle einen formellen Brief basierend auf folgender Nutzerbeschreibung.\n\n");
+        prompt.append("Erstelle einen vollständigen formellen Brief basierend auf folgender Nutzerbeschreibung.\n\n");
         prompt.append("Beschreibung: ").append(description).append("\n");
         if (senderInfo != null && !senderInfo.isBlank()) {
             prompt.append("Absender: ").append(senderInfo).append("\n");
@@ -127,13 +128,19 @@ public class AiServiceImpl implements AiService {
         if (recipientInfo != null && !recipientInfo.isBlank()) {
             prompt.append("Empfänger: ").append(recipientInfo).append("\n");
         }
-        prompt.append("\nAntworte AUSSCHLIESSLICH mit folgendem JSON (kein Markdown, kein Text davor oder danach).\n");
-        prompt.append("Wenn die Beschreibung zu unklar, sinnlos oder zu kurz ist um einen Brief zu erstellen, setze success auf false und lasse title und content leer.\n");
-        prompt.append("{\"success\":true,\"title\":\"Betreff des Briefes\",\"content\":\"Vollständiger Brieftext hier...\"}");
+        prompt.append("\nWichtig:\n");
+        prompt.append("- Erstelle IMMER einen Brief, auch wenn die Beschreibung kurz ist. Nutze sinnvolle Standardformulierungen.\n");
+        prompt.append("- Setze success nur dann auf false, wenn die Beschreibung völlig sinnlos oder unleserlich ist (z.B. zufällige Zeichen).\n");
+        prompt.append("- Das Feld 'title' enthält NUR den Betreff (eine Zeile, ohne 'Betreff:').\n");
+        prompt.append("- Das Feld 'content' enthält NUR den Brieftext ab der Anrede (z.B. 'Sehr geehrte Damen und Herren,') bis zur Grußformel inkl. Unterschrift. KEINE Absenderadresse, KEINE Empfängeradresse, KEIN Datum, KEIN Betreff.\n");
+        prompt.append("\nAntworte AUSSCHLIESSLICH mit folgendem JSON (kein Markdown, kein Text davor oder danach):\n");
+        prompt.append("{\"success\":true,\"title\":\"Betreff des Briefes\",\"content\":\"Sehr geehrte Damen und Herren,\\n\\n...\"}");
+
         return prompt.toString();
     }
 
     private String callGemini(String prompt) throws Exception {
+        log.info("Calling Gemini model='{}', apiKey set={}", model, apiKey != null && !apiKey.isBlank());
         String url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + apiKey;
 
         Map<String, Object> body = Map.of(
