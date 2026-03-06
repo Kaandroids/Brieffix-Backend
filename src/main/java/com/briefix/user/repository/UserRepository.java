@@ -90,4 +90,6 @@ public interface UserRepository {
      * @param id the UUID of the user to delete; must not be {@code null}
      */
     void deleteById(UUID id);
+
+    Optional<User> findByVerificationToken(String verificationToken);
 }

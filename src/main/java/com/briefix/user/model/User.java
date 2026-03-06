@@ -40,8 +40,10 @@ import java.util.UUID;
  * @param isEmailVerified  Indicates whether the user's email address has been confirmed via verification link.
  * @param fullName         The user's display name shown across the platform. Must be non-blank.
  * @param phone            Optional phone number. When provided, must conform to E.164-compatible format (7–15 digits, optional leading {@code +}).
- * @param plan             The subscription plan tier currently assigned to this user. Defaults to {@link UserPlan#STANDARD}.
- * @param createdAt        Timestamp of account creation in the server's local time. Set server-side at registration; never supplied by clients.
+ * @param plan                      The subscription plan tier currently assigned to this user. Defaults to {@link UserPlan#STANDARD}.
+ * @param createdAt                 Timestamp of account creation in the server's local time. Set server-side at registration; never supplied by clients.
+ * @param verificationToken         One-time token sent by email to verify account ownership. {@code null} once verified or for OAuth2 users.
+ * @param verificationTokenExpiry   Expiry timestamp for {@code verificationToken}. Tokens past this time are rejected.
  */
 public record User(
 
@@ -68,5 +70,9 @@ public record User(
 
         UserPlan plan,
 
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+
+        String verificationToken,
+
+        LocalDateTime verificationTokenExpiry
 ) {}

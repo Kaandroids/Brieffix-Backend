@@ -1,6 +1,8 @@
 package com.briefix.common;
 
 import com.briefix.auth.exception.EmailAlreadyRegisteredException;
+import com.briefix.auth.exception.EmailNotVerifiedException;
+import com.briefix.auth.exception.InvalidVerificationTokenException;
 import com.briefix.contact.exception.ContactNotFoundException;
 import com.briefix.letter.exception.LetterNotFoundException;
 import com.briefix.letter.exception.PremiumRequiredException;
@@ -224,5 +226,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PremiumRequiredException.class)
     public ProblemDetail handlePremiumRequired(PremiumRequiredException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.PAYMENT_REQUIRED, ex.getMessage());
+    }
+
+    @ExceptionHandler(EmailNotVerifiedException.class)
+    public ProblemDetail handleEmailNotVerified(EmailNotVerifiedException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidVerificationTokenException.class)
+    public ProblemDetail handleInvalidVerificationToken(InvalidVerificationTokenException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 }

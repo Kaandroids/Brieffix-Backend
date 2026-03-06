@@ -126,4 +126,9 @@ public class UserRepositoryImpl implements UserRepository {
     public void deleteById(UUID id) {
         jpaRepository.deleteById(id);
     }
+
+    @Override
+    public Optional<User> findByVerificationToken(String verificationToken) {
+        return jpaRepository.findByVerificationToken(verificationToken).map(userMapper::toModel);
+    }
 }

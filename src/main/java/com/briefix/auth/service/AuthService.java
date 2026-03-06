@@ -3,6 +3,8 @@ package com.briefix.auth.service;
 import com.briefix.auth.dto.AuthResponse;
 import com.briefix.auth.dto.LoginRequest;
 import com.briefix.auth.dto.RegisterRequest;
+import com.briefix.auth.exception.EmailNotVerifiedException;
+import com.briefix.auth.exception.InvalidVerificationTokenException;
 
 /**
  * Application service interface defining the authentication use cases for Briefix.
@@ -41,7 +43,7 @@ public interface AuthService {
      * @throws com.briefix.auth.exception.EmailAlreadyRegisteredException if the email
      *         address in {@code request} is already associated with an existing account
      */
-    AuthResponse register(RegisterRequest request);
+    void register(RegisterRequest request);
 
     /**
      * Authenticates an existing user by verifying their email and password, then issues
@@ -92,4 +94,21 @@ public interface AuthService {
      *         signature is invalid, or the token has expired
      */
     AuthResponse refresh(String refreshToken);
+
+    /**
+     * Verifies a user's email address using the one-time token sent at registration.
+     *
+     * @param token the verification token from the email link; must not be {@code null}
+     * @throws InvalidVerificationTokenException if the token does not exist or has expired
+     */
+    void verifyEmail(String token);
+
+    /**
+     * Resends the verification email for the account associated with the given email address.
+     * If the account does not exist or is already verified, the call completes silently
+     * to prevent user enumeration.
+     *
+     * @param email the email address of the account to resend verification for
+     */
+    void resendVerification(String email);
 }

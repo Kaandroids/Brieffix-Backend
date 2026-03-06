@@ -69,7 +69,9 @@ public class UserMapper {
                 entity.getFullName(),
                 entity.getPhone(),
                 entity.getPlan(),
-                entity.getCreatedAt()
+                entity.getCreatedAt(),
+                entity.getVerificationToken(),
+                entity.getVerificationTokenExpiry()
         );
     }
 
@@ -98,6 +100,8 @@ public class UserMapper {
         entity.setPhone(user.phone());
         entity.setPlan(user.plan());
         entity.setCreatedAt(user.createdAt());
+        entity.setVerificationToken(user.verificationToken());
+        entity.setVerificationTokenExpiry(user.verificationTokenExpiry());
         return entity;
     }
 }

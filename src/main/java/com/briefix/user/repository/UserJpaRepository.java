@@ -50,4 +50,6 @@ public interface UserJpaRepository extends JpaRepository<UserEntity, UUID> {
      *         {@code false} otherwise
      */
     boolean existsByEmail(String email);
+
+    Optional<UserEntity> findByVerificationToken(String verificationToken);
 }
