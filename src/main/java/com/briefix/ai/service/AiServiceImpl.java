@@ -128,7 +128,7 @@ public class AiServiceImpl implements AiService {
         return prompt.toString();
     }
 
-    private String callGemini(String prompt) {
+    private String callGemini(String prompt) throws Exception {
         String url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + apiKey;
 
         Map<String, Object> body = Map.of(
