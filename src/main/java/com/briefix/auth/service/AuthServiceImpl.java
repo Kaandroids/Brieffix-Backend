@@ -1,11 +1,17 @@
 package com.briefix.auth.service;
 
 import com.briefix.auth.dto.AuthResponse;
+import com.briefix.auth.dto.GoogleAuthRequest;
 import com.briefix.auth.dto.LoginRequest;
 import com.briefix.auth.dto.RegisterRequest;
 import com.briefix.auth.exception.EmailAlreadyRegisteredException;
 import com.briefix.auth.exception.EmailNotVerifiedException;
+import com.briefix.auth.exception.GoogleAuthException;
 import com.briefix.auth.exception.InvalidVerificationTokenException;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import com.briefix.security.JwtService;
 import com.briefix.security.TokenBlacklistService;
 import com.briefix.user.model.AuthProvider;
@@ -17,9 +23,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.UUID;
 
 @Service
@@ -34,6 +42,9 @@ public class AuthServiceImpl implements AuthService {
     private final UserDetailsService userDetailsService;
     private final TokenBlacklistService tokenBlacklistService;
     private final EmailService emailService;
+
+    @Value("${app.google.client-id}")
+    private String googleClientId;
 
     public AuthServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
@@ -156,6 +167,58 @@ public class AuthServiceImpl implements AuthService {
         );
 
         userRepository.save(verified);
+    }
+
+    @Override
+    public AuthResponse loginWithGoogle(GoogleAuthRequest request) {
+        GoogleIdToken.Payload payload = verifyGoogleToken(request.idToken());
+
+        String email      = payload.getEmail();
+        String providerId = payload.getSubject();
+        String fullName   = (String) payload.get("name");
+
+        return userRepository.findByEmail(email).map(existing -> {
+            if (existing.provider() != AuthProvider.GOOGLE) {
+                throw new GoogleAuthException(
+                    "This email is already registered with a password. Please use email/password login."
+                );
+            }
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            return AuthResponse.of(
+                jwtService.generateAccessToken(userDetails),
+                jwtService.generateRefreshToken(userDetails)
+            );
+        }).orElseGet(() -> {
+            var newUser = new User(
+                null, email, null, AuthProvider.GOOGLE, providerId,
+                true, fullName != null ? fullName : email, null,
+                UserPlan.STANDARD, null, null, null
+            );
+            userRepository.save(newUser);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            return AuthResponse.of(
+                jwtService.generateAccessToken(userDetails),
+                jwtService.generateRefreshToken(userDetails)
+            );
+        });
+    }
+
+    private GoogleIdToken.Payload verifyGoogleToken(String idToken) {
+        try {
+            var verifier = new GoogleIdTokenVerifier.Builder(
+                new NetHttpTransport(), GsonFactory.getDefaultInstance())
+                .setAudience(Collections.singletonList(googleClientId))
+                .build();
+            GoogleIdToken token = verifier.verify(idToken);
+            if (token == null) {
+                throw new GoogleAuthException("Invalid Google ID token.");
+            }
+            return token.getPayload();
+        } catch (GoogleAuthException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new GoogleAuthException("Failed to verify Google token: " + e.getMessage());
+        }
     }
 
     @Override

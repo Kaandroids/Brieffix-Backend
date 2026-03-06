@@ -1,6 +1,7 @@
 package com.briefix.auth.service;
 
 import com.briefix.auth.dto.AuthResponse;
+import com.briefix.auth.dto.GoogleAuthRequest;
 import com.briefix.auth.dto.LoginRequest;
 import com.briefix.auth.dto.RegisterRequest;
 import com.briefix.auth.exception.EmailNotVerifiedException;
@@ -111,4 +112,15 @@ public interface AuthService {
      * @param email the email address of the account to resend verification for
      */
     void resendVerification(String email);
+
+    /**
+     * Authenticates or registers a user via a Google ID token.
+     * If the email belongs to an existing LOCAL account, throws {@link com.briefix.auth.exception.GoogleAuthException}.
+     * If the email belongs to an existing GOOGLE account, issues a JWT pair.
+     * If the email is new, creates a GOOGLE account and issues a JWT pair.
+     *
+     * @param request contains the Google ID token issued by the Google Sign-In SDK
+     * @return a JWT token pair on success
+     */
+    AuthResponse loginWithGoogle(GoogleAuthRequest request);
 }

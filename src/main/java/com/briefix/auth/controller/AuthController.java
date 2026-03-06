@@ -1,6 +1,7 @@
 package com.briefix.auth.controller;
 
 import com.briefix.auth.dto.AuthResponse;
+import com.briefix.auth.dto.GoogleAuthRequest;
 import com.briefix.auth.dto.LoginRequest;
 import com.briefix.auth.dto.RefreshRequest;
 import com.briefix.auth.dto.RegisterRequest;
@@ -81,6 +82,11 @@ public class AuthController {
     public ResponseEntity<Void> resendVerification(@RequestBody Map<String, String> body) {
         authService.resendVerification(body.get("email"));
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<AuthResponse> googleLogin(@RequestBody GoogleAuthRequest request) {
+        return ResponseEntity.ok(authService.loginWithGoogle(request));
     }
 
     /**

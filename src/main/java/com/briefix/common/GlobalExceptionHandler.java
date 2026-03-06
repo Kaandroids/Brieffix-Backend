@@ -2,6 +2,7 @@ package com.briefix.common;
 
 import com.briefix.auth.exception.EmailAlreadyRegisteredException;
 import com.briefix.auth.exception.EmailNotVerifiedException;
+import com.briefix.auth.exception.GoogleAuthException;
 import com.briefix.auth.exception.InvalidVerificationTokenException;
 import com.briefix.contact.exception.ContactNotFoundException;
 import com.briefix.letter.exception.LetterNotFoundException;
@@ -236,5 +237,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidVerificationTokenException.class)
     public ProblemDetail handleInvalidVerificationToken(InvalidVerificationTokenException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(GoogleAuthException.class)
+    public ProblemDetail handleGoogleAuth(GoogleAuthException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 }
