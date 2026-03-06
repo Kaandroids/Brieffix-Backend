@@ -10,6 +10,8 @@ import com.briefix.user.model.User;
 import com.briefix.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -19,6 +21,8 @@ import java.util.UUID;
 
 @Service
 public class AiServiceImpl implements AiService {
+
+    private static final Logger log = LoggerFactory.getLogger(AiServiceImpl.class);
 
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
@@ -56,6 +60,7 @@ public class AiServiceImpl implements AiService {
             String responseText = callGemini(prompt);
             return parseResponse(responseText);
         } catch (Exception e) {
+            log.error("AI letter generation failed: {}", e.getMessage(), e);
             return new AiLetterResponse(null, null, false);
         }
     }
@@ -153,17 +158,23 @@ public class AiServiceImpl implements AiService {
     }
 
     private AiLetterResponse parseResponse(String text) throws Exception {
-        // Strip markdown code fences if Gemini wraps the JSON anyway
-        String cleaned = text.strip();
-        if (cleaned.startsWith("```")) {
-            cleaned = cleaned.replaceAll("^```[a-z]*\\n?", "").replaceAll("```$", "").strip();
+        log.info("Gemini raw response: {}", text);
+        // Extract JSON by finding outermost { ... } — immune to markdown fences or extra text
+        int start = text.indexOf('{');
+        int end   = text.lastIndexOf('}');
+        if (start == -1 || end == -1 || end <= start) {
+            log.warn("No JSON object found in Gemini response");
+            return new AiLetterResponse(null, null, false);
         }
-        JsonNode node = objectMapper.readTree(cleaned);
+        String json = text.substring(start, end + 1);
+        JsonNode node = objectMapper.readTree(json);
         boolean success = node.path("success").asBoolean(true);
         if (!success) return new AiLetterResponse(null, null, false);
         String title   = node.path("title").asText(null);
         String content = node.path("content").asText(null);
-        if (title == null || content == null) return new AiLetterResponse(null, null, false);
+        if (title == null || title.isBlank() || content == null || content.isBlank()) {
+            return new AiLetterResponse(null, null, false);
+        }
         return new AiLetterResponse(title, content, true);
     }
 }
