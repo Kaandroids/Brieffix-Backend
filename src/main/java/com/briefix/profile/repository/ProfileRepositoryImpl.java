@@ -124,6 +124,13 @@ public class ProfileRepositoryImpl implements ProfileRepository {
         var user = userJpaRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
         var entity = profileMapper.toEntity(profile, user);
+        // Preserve existing logo bytes so a profile update never silently clears the logo.
+        if (entity.getId() != null) {
+            jpaRepository.findById(entity.getId()).ifPresent(existing -> {
+                entity.setLogo(existing.getLogo());
+                entity.setLogoContentType(existing.getLogoContentType());
+            });
+        }
         var saved = jpaRepository.save(entity);
         return profileMapper.toModel(saved);
     }
