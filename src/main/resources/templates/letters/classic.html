@@ -117,6 +117,9 @@
       <th:block th:if="${!#strings.isEmpty(recipient.companyName)}">
         <span style="font-weight:bold;" th:text="${recipient.companyName}"></span><br/>
       </th:block>
+      <th:block th:if="${!#strings.isEmpty(recipient.department)}">
+        <span th:text="${recipient.department}"></span><br/>
+      </th:block>
       <th:block th:if="${!#strings.isEmpty(recipient.contactPerson)}">
         <span th:text="${(!#strings.isEmpty(recipient.salutation) ? recipient.salutation + ' ' : '') + recipient.contactPerson}"></span><br/>
       </th:block>

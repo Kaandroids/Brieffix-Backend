@@ -80,8 +80,9 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RateLimitFilter extends OncePerRequestFilter {
 
-    private static final String LOGIN_PATH    = "/api/v1/auth/login";
-    private static final String REGISTER_PATH = "/api/v1/auth/register";
+    private static final String LOGIN_PATH          = "/api/v1/auth/login";
+    private static final String REGISTER_PATH       = "/api/v1/auth/register";
+    private static final String PUBLIC_PREVIEW_PATH = "/api/v1/public/letter-preview";
 
     private final StringRedisTemplate redis;
     private final ObjectMapper        objectMapper;
@@ -101,6 +102,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
     /** Duration of the fixed window in seconds for the register endpoint. */
     @Value("${app.rate-limit.register.window-seconds:60}")
     private int registerWindowSeconds;
+
+    /** Maximum number of public letter-preview requests allowed per IP per day. */
+    @Value("${app.rate-limit.public-preview.max-requests:3}")
+    private int publicPreviewMaxRequests;
+
+    /** Duration of the fixed window in seconds for the public preview endpoint (1 day). */
+    @Value("${app.rate-limit.public-preview.window-seconds:86400}")
+    private int publicPreviewWindowSeconds;
 
     /**
      * Constructs a new {@code RateLimitFilter} with the required Redis template and
@@ -142,6 +151,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
         } else if (REGISTER_PATH.equals(path)) {
             maxRequests   = registerMaxRequests;
             windowSeconds = registerWindowSeconds;
+        } else if (PUBLIC_PREVIEW_PATH.equals(path)) {
+            maxRequests   = publicPreviewMaxRequests;
+            windowSeconds = publicPreviewWindowSeconds;
         } else {
             filterChain.doFilter(request, response);
             return;

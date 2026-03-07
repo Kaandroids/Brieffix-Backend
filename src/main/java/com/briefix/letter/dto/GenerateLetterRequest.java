@@ -80,11 +80,13 @@ public record GenerateLetterRequest(
 
         // Recipient — either a saved contact or manually entered fields
         UUID contactId,
+        String recipientEntityType,
         String recipientSalutation,
         String recipientFirstName,
         String recipientLastName,
         String recipientCompany,
         String recipientContactPerson,
+        String recipientDepartment,
         String recipientStreet,
         String recipientStreetNumber,
         String recipientPostalCode,

@@ -55,6 +55,7 @@ public record RecipientSnapshot(
         String lastName,
         String companyName,
         String contactPerson,
+        String department,
         String street,
         String streetNumber,
         String postalCode,

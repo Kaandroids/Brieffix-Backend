@@ -93,6 +93,9 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception e) {
             // Log but don't fail registration — user can resend from the check-email page
             System.err.println("Failed to send verification email to " + request.email() + ": " + e.getMessage());
+            if (e.getCause() != null) {
+                System.err.println("Caused by: " + e.getCause().getMessage());
+            }
         }
     }
 
@@ -250,6 +253,9 @@ public class AuthServiceImpl implements AuthService {
                 emailService.sendVerificationEmail(user.email(), user.fullName(), token);
             } catch (Exception e) {
                 System.err.println("Failed to resend verification email to " + user.email() + ": " + e.getMessage());
+                if (e.getCause() != null) {
+                    System.err.println("Caused by: " + e.getCause().getMessage());
+                }
             }
         });
     }

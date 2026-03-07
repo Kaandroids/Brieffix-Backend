@@ -11,6 +11,7 @@ import com.briefix.letter.mapper.LetterMapper;
 import com.briefix.letter.model.*;
 import com.briefix.letter.repository.LetterRepository;
 import com.briefix.profile.exception.ProfileNotFoundException;
+import com.briefix.profile.model.PartyType;
 import com.briefix.profile.model.Profile;
 import com.briefix.profile.repository.ProfileRepository;
 import com.briefix.user.exception.UserNotFoundException;
@@ -379,12 +380,13 @@ public class LetterServiceImpl implements LetterService {
             return fromContact(contact);
         }
         return new RecipientSnapshot(
-                null,
+                req.recipientEntityType(),
                 req.recipientSalutation(),
                 req.recipientFirstName(),
                 req.recipientLastName(),
                 req.recipientCompany(),
                 req.recipientContactPerson(),
+                req.recipientDepartment(),
                 req.recipientStreet(),
                 req.recipientStreetNumber(),
                 req.recipientPostalCode(),
@@ -456,11 +458,12 @@ public class LetterServiceImpl implements LetterService {
     private RecipientSnapshot fromContact(Contact c) {
         return new RecipientSnapshot(
                 c.type().name(),
-                c.salutation(),
+                c.type() == PartyType.ORGANIZATION ? c.contactPersonSalutation() : c.salutation(),
                 c.firstName(),
                 c.lastName(),
                 c.companyName(),
                 c.contactPerson(),
+                c.department(),
                 c.street(),
                 c.streetNumber(),
                 c.postalCode(),
