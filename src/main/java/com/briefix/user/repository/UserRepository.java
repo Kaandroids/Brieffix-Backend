@@ -91,5 +91,19 @@ public interface UserRepository {
      */
     void deleteById(UUID id);
 
+    /**
+     * Retrieves a user by their pending email-verification token.
+     *
+     * <p>Used during the email verification flow to locate the account associated
+     * with the token embedded in the verification link. Callers must also check
+     * the token's expiry timestamp ({@link User#verificationTokenExpiry()}) after
+     * a successful match, as this query does not filter out expired tokens.</p>
+     *
+     * @param verificationToken the UUID verification token string to search for;
+     *                          must not be {@code null}
+     * @return an {@link Optional} containing the matching {@link User} if a non-verified
+     *         account with this token exists, or {@link Optional#empty()} if no match
+     *         is found (token unknown or already cleared after verification)
+     */
     Optional<User> findByVerificationToken(String verificationToken);
 }

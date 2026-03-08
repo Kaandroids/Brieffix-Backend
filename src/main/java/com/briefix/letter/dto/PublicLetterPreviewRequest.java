@@ -13,6 +13,23 @@ import java.time.LocalDate;
  * by the service layer.</p>
  *
  * <p>Rate-limited to 3 requests per IP per day via {@link com.briefix.security.RateLimitFilter}.</p>
+ *
+ * <p><strong>Sender fields</strong> ({@code senderType} … {@code senderContactPerson}):
+ * provide the sender's identity and address. {@code senderType} must be either
+ * {@code "INDIVIDUAL"} or {@code "ORGANIZATION"}; defaults to {@code "INDIVIDUAL"} if
+ * absent. {@code senderPostalCode} and {@code senderCity} are required ({@code @NotBlank}).
+ * All other sender fields are optional.</p>
+ *
+ * <p><strong>Recipient fields</strong> ({@code recipientType} … {@code recipientCountry}):
+ * provide the recipient's identity and address. {@code recipientType} follows the same
+ * convention as {@code senderType}. All recipient fields are optional; missing address
+ * components simply produce gaps in the rendered letter.</p>
+ *
+ * <p><strong>Content fields</strong>: {@code title} and {@code body} are required
+ * ({@code @NotBlank}). {@code letterDate} is optional; the current date is used when
+ * {@code null}.</p>
+ *
+ * <p>This record is immutable and safe for concurrent use across threads.</p>
  */
 public record PublicLetterPreviewRequest(
 

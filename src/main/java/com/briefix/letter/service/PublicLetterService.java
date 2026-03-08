@@ -27,11 +27,24 @@ import java.util.Locale;
 @Service
 public class PublicLetterService {
 
+    /**
+     * German-locale date formatter that renders dates in the DIN 5008 style,
+     * e.g. {@code "08. März 2026"}. Used when populating the Thymeleaf template context.
+     */
     private static final DateTimeFormatter DATE_FORMATTER =
             DateTimeFormatter.ofPattern("dd. MMMM yyyy", Locale.GERMAN);
 
+    /**
+     * The Thymeleaf template engine used to render the CLASSIC letter HTML template
+     * before it is converted to PDF by OpenHTMLToPDF.
+     */
     private final TemplateEngine templateEngine;
 
+    /**
+     * Constructs a {@code PublicLetterService} with the required Thymeleaf template engine.
+     *
+     * @param templateEngine the Thymeleaf engine; must not be {@code null}
+     */
     public PublicLetterService(TemplateEngine templateEngine) {
         this.templateEngine = templateEngine;
     }
@@ -51,6 +64,18 @@ public class PublicLetterService {
 
     // ── Private helpers ───────────────────────────────────────────────────────
 
+    /**
+     * Constructs a {@link SenderSnapshot} from the sender fields of the guest request.
+     *
+     * <p>The sender type defaults to {@code "INDIVIDUAL"} if the {@code senderType}
+     * field is not exactly {@code "ORGANIZATION"}. The country defaults to
+     * {@code "Deutschland"} when the supplied value is blank. Fields that are not
+     * applicable to the guest preview (logo, IBAN, BIC, tax number, etc.) are always
+     * set to {@code null}.</p>
+     *
+     * @param req the validated guest request; must not be {@code null}
+     * @return a fully populated {@link SenderSnapshot} ready for the template context
+     */
     private SenderSnapshot buildSender(PublicLetterPreviewRequest req) {
         String type = "ORGANIZATION".equals(req.senderType()) ? "ORGANIZATION" : "INDIVIDUAL";
         String country = notBlank(req.senderCountry()) ? req.senderCountry() : "Deutschland";
@@ -76,6 +101,18 @@ public class PublicLetterService {
         );
     }
 
+    /**
+     * Constructs a {@link RecipientSnapshot} from the recipient fields of the guest request.
+     *
+     * <p>The recipient type defaults to {@code "INDIVIDUAL"} if the {@code recipientType}
+     * field is not exactly {@code "ORGANIZATION"}. For organization recipients the
+     * salutation is taken from {@code recipientContactPersonSalutation}; for individual
+     * recipients it comes from {@code recipientSalutation}. The country defaults to
+     * {@code "Deutschland"} when the supplied value is blank.</p>
+     *
+     * @param req the validated guest request; must not be {@code null}
+     * @return a fully populated {@link RecipientSnapshot} ready for the template context
+     */
     private RecipientSnapshot buildRecipient(PublicLetterPreviewRequest req) {
         String type = "ORGANIZATION".equals(req.recipientType()) ? "ORGANIZATION" : "INDIVIDUAL";
         String country = notBlank(req.recipientCountry()) ? req.recipientCountry() : "Deutschland";
@@ -100,6 +137,23 @@ public class PublicLetterService {
         );
     }
 
+    /**
+     * Renders the CLASSIC letter template to PDF bytes using Thymeleaf and OpenHTMLToPDF.
+     *
+     * <p>Populates a Thymeleaf {@link Context} with the sender, recipient, title, body,
+     * and formatted date, then processes the {@code letters/classic} template to produce
+     * an XHTML string. OpenHTMLToPDF ({@link PdfRendererBuilder}) converts the XHTML to
+     * a DIN A4 PDF. Logo and decorative image variables are set to {@code null} for
+     * guest previews.</p>
+     *
+     * @param sender      the sender snapshot to include in the template context
+     * @param recipient   the recipient snapshot to include in the template context
+     * @param title       the letter subject line; must not be blank
+     * @param body        the letter body text; must not be blank
+     * @param letterDate  the date to print on the letter
+     * @return the rendered PDF as a byte array
+     * @throws RuntimeException if Thymeleaf template processing or PDF generation fails
+     */
     private byte[] renderPdf(SenderSnapshot sender, RecipientSnapshot recipient,
                               String title, String body, LocalDate letterDate) {
         var ctx = new Context();
@@ -124,6 +178,17 @@ public class PublicLetterService {
         }
     }
 
+    /**
+     * Returns {@code true} if the given string is non-null and not blank.
+     *
+     * <p>Used as a concise null-and-blank guard throughout this service to decide
+     * whether optional address fields should be included in snapshot objects or
+     * defaulted to fallback values.</p>
+     *
+     * @param s the string to test; may be {@code null}
+     * @return {@code true} if {@code s} is non-null and contains at least one
+     *         non-whitespace character; {@code false} otherwise
+     */
     private boolean notBlank(String s) {
         return s != null && !s.isBlank();
     }

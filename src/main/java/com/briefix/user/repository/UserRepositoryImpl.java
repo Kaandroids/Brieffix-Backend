@@ -127,6 +127,19 @@ public class UserRepositoryImpl implements UserRepository {
         jpaRepository.deleteById(id);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Delegates to {@link UserJpaRepository#findByVerificationToken(String)} and maps
+     * the resulting {@link com.briefix.user.entity.UserEntity} to a domain {@link User}
+     * record using the injected mapper. The expiry check is intentionally left to the
+     * service layer so that the repository remains a pure data-access concern.</p>
+     *
+     * @param verificationToken the verification token string to search for;
+     *                          must not be {@code null}
+     * @return an {@link Optional} containing the matching {@link User} if found,
+     *         or {@link Optional#empty()} otherwise
+     */
     @Override
     public Optional<User> findByVerificationToken(String verificationToken) {
         return jpaRepository.findByVerificationToken(verificationToken).map(userMapper::toModel);

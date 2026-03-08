@@ -334,6 +334,23 @@ public class AiServiceImpl {
                 .path("text").asText();
     }
 
+    /**
+     * Extracts the JSON payload from the Gemini response text and deserialises it
+     * into an {@link AiLetterResponse}.
+     *
+     * <p>The JSON is located by finding the first {@code '{'} and the last {@code '}'}
+     * in the response text — a strategy that is immune to Markdown code fences or
+     * additional prose that the model may prepend or append. If no valid JSON object
+     * boundaries are found, or if the parsed {@code success} flag is {@code false},
+     * a failure response is returned. Empty or blank {@code title} and {@code content}
+     * values are also treated as failures.</p>
+     *
+     * @param text the raw text returned by {@link #callGemini(String)}
+     * @return an {@link AiLetterResponse} with {@code success: true} and the extracted
+     *         {@code title} and {@code content}, or a failure response if the JSON is
+     *         absent, malformed, or indicates failure
+     * @throws Exception if Jackson fails to parse the extracted JSON string
+     */
     private AiLetterResponse parseResponse(String text) throws Exception {
         log.info("Gemini raw response: {}", text);
         // Extract JSON by finding outermost { ... } — immune to markdown fences or extra text

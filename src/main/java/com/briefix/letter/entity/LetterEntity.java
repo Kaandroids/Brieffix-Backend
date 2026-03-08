@@ -216,6 +216,17 @@ public class LetterEntity {
      *         externally
      */
     public String getPdfUrl() { return pdfUrl; }
+
+    /**
+     * Returns the UUID of the sender profile that was active when this letter was
+     * generated.
+     *
+     * <p>This value is retained so that the PDF renderer can re-load the associated
+     * logo image when the letter is re-rendered on demand.  May be {@code null} for
+     * letters created before this field was introduced or when no profile was selected.</p>
+     *
+     * @return the profile UUID, or {@code null} if not associated with a profile
+     */
     public UUID getProfileId() { return profileId; }
 
     /**
@@ -294,6 +305,13 @@ public class LetterEntity {
      *               reference
      */
     public void setPdfUrl(String pdfUrl) { this.pdfUrl = pdfUrl; }
+
+    /**
+     * Sets the UUID of the sender profile associated with this letter.
+     *
+     * @param profileId the profile UUID to associate, or {@code null} to clear the
+     *                  association
+     */
     public void setProfileId(UUID profileId) { this.profileId = profileId; }
 
     /**

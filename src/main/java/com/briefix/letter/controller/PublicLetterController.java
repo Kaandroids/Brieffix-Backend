@@ -23,8 +23,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/public")
 public class PublicLetterController {
 
+    /**
+     * The service delegate that builds address snapshots and renders the PDF.
+     */
     private final PublicLetterService publicLetterService;
 
+    /**
+     * Constructs a {@code PublicLetterController} with the required service dependency.
+     *
+     * @param publicLetterService the service used to render guest letter PDFs;
+     *                            must not be {@code null}
+     */
     public PublicLetterController(PublicLetterService publicLetterService) {
         this.publicLetterService = publicLetterService;
     }
@@ -49,6 +58,17 @@ public class PublicLetterController {
                 .body(pdf);
     }
 
+    /**
+     * Strips characters that are illegal in common file-system file names from the
+     * given string to produce a safe PDF download filename.
+     *
+     * <p>The following characters are replaced with an underscore ({@code _}):
+     * {@code \}, {@code /}, {@code :}, {@code *}, {@code ?}, {@code "}, {@code <},
+     * {@code >}, and {@code |}. Leading and trailing whitespace is also trimmed.</p>
+     *
+     * @param name the raw letter title to sanitise; must not be {@code null}
+     * @return a trimmed string safe for use as a file-system file name
+     */
     private String sanitizeFilename(String name) {
         return name.replaceAll("[\\\\/:*?\"<>|]", "_").trim();
     }

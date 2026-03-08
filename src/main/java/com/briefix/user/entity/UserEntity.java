@@ -105,9 +105,21 @@ public class UserEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    /**
+     * A one-time UUID token sent to the user via email to prove ownership of their
+     * email address. Set at registration and on each resend request; cleared (set to
+     * {@code null}) upon successful verification. {@code null} for OAuth2 users and
+     * for users who have already verified their email.
+     */
     @Column(name = "verification_token")
     private String verificationToken;
 
+    /**
+     * The UTC timestamp at which {@link #verificationToken} expires. The token is
+     * valid for 24 hours from the moment it is generated. A token whose expiry is in
+     * the past must be treated as invalid even if it still exists in the database.
+     * {@code null} when there is no active verification token.
+     */
     @Column(name = "verification_token_expiry")
     private LocalDateTime verificationTokenExpiry;
 
@@ -272,9 +284,33 @@ public class UserEntity {
      */
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
+    /**
+     * Returns the pending email-verification token for this user.
+     *
+     * @return the verification token string, or {@code null} if no active token exists
+     */
     public String getVerificationToken() { return verificationToken; }
+
+    /**
+     * Sets the email-verification token. Pass {@code null} to clear the token after
+     * successful verification.
+     *
+     * @param verificationToken the new verification token, or {@code null} to clear it
+     */
     public void setVerificationToken(String verificationToken) { this.verificationToken = verificationToken; }
 
+    /**
+     * Returns the expiry timestamp of the current email-verification token.
+     *
+     * @return the expiry timestamp, or {@code null} if no active token exists
+     */
     public LocalDateTime getVerificationTokenExpiry() { return verificationTokenExpiry; }
+
+    /**
+     * Sets the expiry timestamp for the email-verification token. Pass {@code null} to
+     * clear the expiry when the token is cleared after successful verification.
+     *
+     * @param verificationTokenExpiry the new expiry timestamp, or {@code null} to clear it
+     */
     public void setVerificationTokenExpiry(LocalDateTime verificationTokenExpiry) { this.verificationTokenExpiry = verificationTokenExpiry; }
 }

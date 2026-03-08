@@ -51,5 +51,20 @@ public interface UserJpaRepository extends JpaRepository<UserEntity, UUID> {
      */
     boolean existsByEmail(String email);
 
+    /**
+     * Queries the {@code users} table for a record whose {@code verification_token}
+     * column matches the given value.
+     *
+     * <p>Used by {@link UserRepositoryImpl#findByVerificationToken(String)} to
+     * locate the entity for the email verification flow.  Spring Data JPA derives
+     * the query from this method name at application startup.  Note that this query
+     * does not filter on expiry — callers are responsible for checking the
+     * {@code verification_token_expiry} column after retrieval.</p>
+     *
+     * @param verificationToken the verification token string to search for;
+     *                          must not be {@code null}
+     * @return an {@link Optional} containing the matching {@link UserEntity} if found,
+     *         or {@link Optional#empty()} otherwise
+     */
     Optional<UserEntity> findByVerificationToken(String verificationToken);
 }
