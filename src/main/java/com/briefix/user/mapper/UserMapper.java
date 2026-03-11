@@ -44,7 +44,13 @@ public class UserMapper {
                 user.fullName(),
                 user.phone(),
                 user.plan(),
-                user.createdAt()
+                user.createdAt(),
+                user.billingName(),
+                user.billingStreet(),
+                user.billingStreetNo(),
+                user.billingZip(),
+                user.billingCity(),
+                user.billingCountry()
         );
     }
 
@@ -71,7 +77,15 @@ public class UserMapper {
                 entity.getPlan(),
                 entity.getCreatedAt(),
                 entity.getVerificationToken(),
-                entity.getVerificationTokenExpiry()
+                entity.getVerificationTokenExpiry(),
+                entity.getPasswordResetToken(),
+                entity.getPasswordResetTokenExpiry(),
+                entity.getBillingName(),
+                entity.getBillingStreet(),
+                entity.getBillingStreetNo(),
+                entity.getBillingZip(),
+                entity.getBillingCity(),
+                entity.getBillingCountry()
         );
     }
 
@@ -102,6 +116,14 @@ public class UserMapper {
         entity.setCreatedAt(user.createdAt());
         entity.setVerificationToken(user.verificationToken());
         entity.setVerificationTokenExpiry(user.verificationTokenExpiry());
+        entity.setPasswordResetToken(user.passwordResetToken());
+        entity.setPasswordResetTokenExpiry(user.passwordResetTokenExpiry());
+        entity.setBillingName(user.billingName());
+        entity.setBillingStreet(user.billingStreet());
+        entity.setBillingStreetNo(user.billingStreetNo());
+        entity.setBillingZip(user.billingZip());
+        entity.setBillingCity(user.billingCity());
+        entity.setBillingCountry(user.billingCountry());
         return entity;
     }
 }

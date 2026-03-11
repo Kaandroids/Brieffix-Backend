@@ -1,5 +1,6 @@
 package com.briefix.user.service;
 
+import com.briefix.user.dto.UpdateBillingRequest;
 import com.briefix.user.dto.UserDto;
 
 import java.util.UUID;
@@ -52,4 +53,10 @@ public interface UserService {
      * @throws com.briefix.user.exception.UserNotFoundException if no user exists with the given email
      */
     UserDto findByEmail(String email);
+
+    UserDto updateProfile(String email, String fullName, String phone);
+
+    void updatePassword(String email, String currentPassword, String newPassword);
+
+    UserDto updateBilling(String email, UpdateBillingRequest request);
 }

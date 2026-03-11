@@ -39,5 +39,11 @@ public record UserDto(
         String fullName,
         String phone,
         UserPlan plan,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String billingName,
+        String billingStreet,
+        String billingStreetNo,
+        String billingZip,
+        String billingCity,
+        String billingCountry
 ) {}

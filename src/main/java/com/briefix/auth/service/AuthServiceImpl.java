@@ -173,7 +173,9 @@ public class AuthServiceImpl implements AuthService {
                 UserPlan.STANDARD,
                 null,
                 token,
-                expiry
+                expiry,
+                null, null,
+                null, null, null, null, null, null
         );
 
         userRepository.save(user);
@@ -308,7 +310,10 @@ public class AuthServiceImpl implements AuthService {
                 user.plan(),
                 user.createdAt(),
                 null,
-                null
+                null,
+                null, null,
+                user.billingName(), user.billingStreet(), user.billingStreetNo(),
+                user.billingZip(), user.billingCity(), user.billingCountry()
         );
 
         userRepository.save(verified);
@@ -355,7 +360,9 @@ public class AuthServiceImpl implements AuthService {
             var newUser = new User(
                 null, email, null, AuthProvider.GOOGLE, providerId,
                 true, fullName != null ? fullName : email, null,
-                UserPlan.STANDARD, null, null, null
+                UserPlan.STANDARD, null, null, null,
+                null, null,
+                null, null, null, null, null, null
             );
             userRepository.save(newUser);
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
@@ -380,6 +387,52 @@ public class AuthServiceImpl implements AuthService {
      * @throws GoogleAuthException if the token is {@code null} (invalid or unverifiable),
      *                             or if any other exception occurs during verification
      */
+    @Override
+    public void forgotPassword(String email) {
+        userRepository.findByEmail(email).ifPresent(user -> {
+            if (user.provider() != AuthProvider.LOCAL) return;
+
+            String token = UUID.randomUUID().toString();
+            LocalDateTime expiry = LocalDateTime.now().plusHours(1);
+
+            var updated = new User(
+                    user.id(), user.email(), user.passwordHash(), user.provider(), user.providerId(),
+                    user.isEmailVerified(), user.fullName(), user.phone(), user.plan(), user.createdAt(),
+                    user.verificationToken(), user.verificationTokenExpiry(),
+                    token, expiry,
+                    user.billingName(), user.billingStreet(), user.billingStreetNo(),
+                    user.billingZip(), user.billingCity(), user.billingCountry()
+            );
+            userRepository.save(updated);
+
+            try {
+                emailService.sendPasswordResetEmail(user.email(), user.fullName(), token);
+            } catch (Exception e) {
+                System.err.println("Failed to send password reset email to " + user.email() + ": " + e.getMessage());
+            }
+        });
+    }
+
+    @Override
+    public void resetPassword(String token, String newPassword) {
+        var user = userRepository.findByPasswordResetToken(token)
+                .orElseThrow(InvalidVerificationTokenException::new);
+
+        if (user.passwordResetTokenExpiry() == null || LocalDateTime.now().isAfter(user.passwordResetTokenExpiry())) {
+            throw new InvalidVerificationTokenException();
+        }
+
+        var updated = new User(
+                user.id(), user.email(), passwordEncoder.encode(newPassword), user.provider(), user.providerId(),
+                user.isEmailVerified(), user.fullName(), user.phone(), user.plan(), user.createdAt(),
+                user.verificationToken(), user.verificationTokenExpiry(),
+                null, null,
+                user.billingName(), user.billingStreet(), user.billingStreetNo(),
+                user.billingZip(), user.billingCity(), user.billingCountry()
+        );
+        userRepository.save(updated);
+    }
+
     private GoogleIdToken.Payload verifyGoogleToken(String idToken) {
         try {
             var verifier = new GoogleIdTokenVerifier.Builder(
@@ -431,7 +484,10 @@ public class AuthServiceImpl implements AuthService {
                     user.plan(),
                     user.createdAt(),
                     token,
-                    expiry
+                    expiry,
+                    null, null,
+                    user.billingName(), user.billingStreet(), user.billingStreetNo(),
+                    user.billingZip(), user.billingCity(), user.billingCountry()
             );
 
             userRepository.save(updated);

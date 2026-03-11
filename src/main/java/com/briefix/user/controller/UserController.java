@@ -1,14 +1,17 @@
 package com.briefix.user.controller;
 
+import com.briefix.user.dto.UpdateBillingRequest;
+import com.briefix.user.dto.UpdatePasswordRequest;
+import com.briefix.user.dto.UpdateProfileRequest;
 import com.briefix.user.dto.UserDto;
 import com.briefix.user.exception.UserNotFoundException;
 import com.briefix.user.mapper.UserMapper;
 import com.briefix.user.repository.UserRepository;
+import com.briefix.user.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * REST controller exposing user-related endpoints under the {@code /api/v1/users} base path.
@@ -36,25 +39,13 @@ public class UserController {
      * The email extracted from the security context serves as the lookup key.
      */
     private final UserRepository userRepository;
-
-    /**
-     * Mapper used to convert the loaded {@link com.briefix.user.model.User} domain record
-     * into a safe {@link UserDto} before serializing it to the HTTP response body.
-     */
     private final UserMapper userMapper;
+    private final UserService userService;
 
-    /**
-     * Constructs a {@code UserController} with the required repository and mapper.
-     *
-     * <p>Constructor injection is used to make all dependencies explicit and to
-     * support unit testing with mock implementations.</p>
-     *
-     * @param userRepository the repository for loading user records; must not be {@code null}
-     * @param userMapper     the mapper for converting domain records to DTOs; must not be {@code null}
-     */
-    public UserController(UserRepository userRepository, UserMapper userMapper) {
+    public UserController(UserRepository userRepository, UserMapper userMapper, UserService userService) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.userService = userService;
     }
 
     /**
@@ -81,5 +72,26 @@ public class UserController {
         var user = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new UserNotFoundException(authentication.getName()));
         return ResponseEntity.ok(userMapper.toDto(user));
+    }
+
+    @PutMapping("/me/profile")
+    public ResponseEntity<UserDto> updateProfile(Authentication authentication,
+                                                  @Valid @RequestBody UpdateProfileRequest request) {
+        return ResponseEntity.ok(userService.updateProfile(authentication.getName(),
+                request.fullName(), request.phone()));
+    }
+
+    @PutMapping("/me/password")
+    public ResponseEntity<Void> updatePassword(Authentication authentication,
+                                                @Valid @RequestBody UpdatePasswordRequest request) {
+        userService.updatePassword(authentication.getName(),
+                request.currentPassword(), request.newPassword());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/me/billing")
+    public ResponseEntity<UserDto> updateBilling(Authentication authentication,
+                                                  @RequestBody UpdateBillingRequest request) {
+        return ResponseEntity.ok(userService.updateBilling(authentication.getName(), request));
     }
 }

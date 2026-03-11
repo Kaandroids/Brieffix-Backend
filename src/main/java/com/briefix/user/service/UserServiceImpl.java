@@ -1,9 +1,14 @@
 package com.briefix.user.service;
 
+import com.briefix.user.dto.UpdateBillingRequest;
 import com.briefix.user.dto.UserDto;
+import com.briefix.user.exception.InvalidCurrentPasswordException;
 import com.briefix.user.exception.UserNotFoundException;
 import com.briefix.user.mapper.UserMapper;
+import com.briefix.user.model.AuthProvider;
+import com.briefix.user.model.User;
 import com.briefix.user.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -34,24 +39,14 @@ public class UserServiceImpl implements UserService {
      */
     private final UserRepository userRepository;
 
-    /**
-     * Mapper used to convert {@link com.briefix.user.model.User} domain records
-     * to {@link UserDto} instances before returning them to callers.
-     */
     private final UserMapper userMapper;
 
-    /**
-     * Constructs a {@code UserServiceImpl} with the required repository and mapper.
-     *
-     * <p>Constructor injection is used to enforce that both dependencies are mandatory
-     * and to facilitate straightforward unit testing with mock implementations.</p>
-     *
-     * @param userRepository the repository port for user persistence operations; must not be {@code null}
-     * @param userMapper     the mapper for converting domain models to DTOs; must not be {@code null}
-     */
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
+    private final PasswordEncoder passwordEncoder;
+
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -90,5 +85,51 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email)
                 .map(userMapper::toDto)
                 .orElseThrow(() -> new UserNotFoundException(email));
+    }
+
+    @Override
+    public UserDto updateProfile(String email, String fullName, String phone) {
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+        var updated = copyWith(user, fullName, phone, user.passwordHash(),
+                user.billingName(), user.billingStreet(), user.billingStreetNo(),
+                user.billingZip(), user.billingCity(), user.billingCountry());
+        return userMapper.toDto(userRepository.save(updated));
+    }
+
+    @Override
+    public void updatePassword(String email, String currentPassword, String newPassword) {
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+        if (user.provider() != AuthProvider.LOCAL) {
+            throw new IllegalStateException("Password change is not supported for OAuth2 accounts");
+        }
+        if (!passwordEncoder.matches(currentPassword, user.passwordHash())) {
+            throw new InvalidCurrentPasswordException();
+        }
+        var updated = copyWith(user, user.fullName(), user.phone(), passwordEncoder.encode(newPassword),
+                user.billingName(), user.billingStreet(), user.billingStreetNo(),
+                user.billingZip(), user.billingCity(), user.billingCountry());
+        userRepository.save(updated);
+    }
+
+    @Override
+    public UserDto updateBilling(String email, UpdateBillingRequest request) {
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+        var updated = copyWith(user, user.fullName(), user.phone(), user.passwordHash(),
+                request.billingName(), request.billingStreet(), request.billingStreetNo(),
+                request.billingZip(), request.billingCity(), request.billingCountry());
+        return userMapper.toDto(userRepository.save(updated));
+    }
+
+    private User copyWith(User u, String fullName, String phone, String passwordHash,
+                          String billingName, String billingStreet, String billingStreetNo,
+                          String billingZip, String billingCity, String billingCountry) {
+        return new User(u.id(), u.email(), passwordHash, u.provider(), u.providerId(),
+                u.isEmailVerified(), fullName, phone, u.plan(), u.createdAt(),
+                u.verificationToken(), u.verificationTokenExpiry(),
+                u.passwordResetToken(), u.passwordResetTokenExpiry(),
+                billingName, billingStreet, billingStreetNo, billingZip, billingCity, billingCountry);
     }
 }

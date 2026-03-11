@@ -106,4 +106,6 @@ public interface UserRepository {
      *         is found (token unknown or already cleared after verification)
      */
     Optional<User> findByVerificationToken(String verificationToken);
+
+    Optional<User> findByPasswordResetToken(String passwordResetToken);
 }

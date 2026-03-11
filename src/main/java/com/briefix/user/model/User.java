@@ -74,5 +74,21 @@ public record User(
 
         String verificationToken,
 
-        LocalDateTime verificationTokenExpiry
+        LocalDateTime verificationTokenExpiry,
+
+        String passwordResetToken,
+
+        LocalDateTime passwordResetTokenExpiry,
+
+        String billingName,
+
+        String billingStreet,
+
+        String billingStreetNo,
+
+        String billingZip,
+
+        String billingCity,
+
+        String billingCountry
 ) {}

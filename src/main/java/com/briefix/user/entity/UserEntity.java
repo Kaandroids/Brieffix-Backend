@@ -123,6 +123,30 @@ public class UserEntity {
     @Column(name = "verification_token_expiry")
     private LocalDateTime verificationTokenExpiry;
 
+    @Column(name = "password_reset_token")
+    private String passwordResetToken;
+
+    @Column(name = "password_reset_token_expiry")
+    private LocalDateTime passwordResetTokenExpiry;
+
+    @Column(name = "billing_name")
+    private String billingName;
+
+    @Column(name = "billing_street")
+    private String billingStreet;
+
+    @Column(name = "billing_street_no")
+    private String billingStreetNo;
+
+    @Column(name = "billing_zip")
+    private String billingZip;
+
+    @Column(name = "billing_city")
+    private String billingCity;
+
+    @Column(name = "billing_country")
+    private String billingCountry;
+
     /**
      * JPA lifecycle callback invoked before the entity is first inserted into the database.
      *
@@ -313,4 +337,28 @@ public class UserEntity {
      * @param verificationTokenExpiry the new expiry timestamp, or {@code null} to clear it
      */
     public void setVerificationTokenExpiry(LocalDateTime verificationTokenExpiry) { this.verificationTokenExpiry = verificationTokenExpiry; }
+
+    public String getPasswordResetToken() { return passwordResetToken; }
+    public void setPasswordResetToken(String passwordResetToken) { this.passwordResetToken = passwordResetToken; }
+
+    public LocalDateTime getPasswordResetTokenExpiry() { return passwordResetTokenExpiry; }
+    public void setPasswordResetTokenExpiry(LocalDateTime passwordResetTokenExpiry) { this.passwordResetTokenExpiry = passwordResetTokenExpiry; }
+
+    public String getBillingName() { return billingName; }
+    public void setBillingName(String billingName) { this.billingName = billingName; }
+
+    public String getBillingStreet() { return billingStreet; }
+    public void setBillingStreet(String billingStreet) { this.billingStreet = billingStreet; }
+
+    public String getBillingStreetNo() { return billingStreetNo; }
+    public void setBillingStreetNo(String billingStreetNo) { this.billingStreetNo = billingStreetNo; }
+
+    public String getBillingZip() { return billingZip; }
+    public void setBillingZip(String billingZip) { this.billingZip = billingZip; }
+
+    public String getBillingCity() { return billingCity; }
+    public void setBillingCity(String billingCity) { this.billingCity = billingCity; }
+
+    public String getBillingCountry() { return billingCountry; }
+    public void setBillingCountry(String billingCountry) { this.billingCountry = billingCountry; }
 }

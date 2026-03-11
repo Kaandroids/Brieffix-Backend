@@ -123,4 +123,8 @@ public interface AuthService {
      * @return a JWT token pair on success
      */
     AuthResponse loginWithGoogle(GoogleAuthRequest request);
+
+    void forgotPassword(String email);
+
+    void resetPassword(String token, String newPassword);
 }

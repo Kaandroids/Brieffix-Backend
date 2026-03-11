@@ -67,4 +67,6 @@ public interface UserJpaRepository extends JpaRepository<UserEntity, UUID> {
      *         or {@link Optional#empty()} otherwise
      */
     Optional<UserEntity> findByVerificationToken(String verificationToken);
+
+    Optional<UserEntity> findByPasswordResetToken(String passwordResetToken);
 }

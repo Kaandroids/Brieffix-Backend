@@ -8,6 +8,7 @@ import com.briefix.contact.exception.ContactNotFoundException;
 import com.briefix.letter.exception.LetterNotFoundException;
 import com.briefix.letter.exception.PremiumRequiredException;
 import com.briefix.profile.exception.ProfileNotFoundException;
+import com.briefix.user.exception.InvalidCurrentPasswordException;
 import com.briefix.user.exception.UserNotFoundException;
 import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
@@ -242,5 +243,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(GoogleAuthException.class)
     public ProblemDetail handleGoogleAuth(GoogleAuthException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidCurrentPasswordException.class)
+    public ProblemDetail handleInvalidCurrentPassword(InvalidCurrentPasswordException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ProblemDetail handleIllegalState(IllegalStateException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 }

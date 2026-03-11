@@ -111,4 +111,37 @@ public class EmailService {
             throw new RuntimeException("Failed to send verification email to " + toEmail, e);
         }
     }
+
+    public void sendPasswordResetEmail(String toEmail, String fullName, String token) {
+        String resetUrl = frontendUrl + "/reset-password?token=" + token;
+        String html = """
+                <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+                  <h2>Passwort zurücksetzen</h2>
+                  <p>Hallo %s,</p>
+                  <p>wir haben eine Anfrage erhalten, das Passwort für Ihr Briefix-Konto zurückzusetzen.
+                     Klicken Sie auf den Button, um ein neues Passwort festzulegen.
+                     Der Link ist 1 Stunde gültig.</p>
+                  <a href="%s"
+                     style="display:inline-block;padding:12px 24px;background:#6366f1;
+                            color:#fff;text-decoration:none;border-radius:6px;font-weight:bold">
+                    Passwort zurücksetzen
+                  </a>
+                  <p style="margin-top:24px;color:#6b7280;font-size:13px">
+                    Falls Sie diese Anfrage nicht gestellt haben, können Sie diese E-Mail ignorieren.
+                  </p>
+                </div>
+                """.formatted(fullName, resetUrl);
+
+        try {
+            var message = mailSender.createMimeMessage();
+            var helper = new MimeMessageHelper(message, "UTF-8");
+            helper.setFrom(fromAddress);
+            helper.setTo(toEmail);
+            helper.setSubject("Briefix – Passwort zurücksetzen");
+            helper.setText(html, true);
+            mailSender.send(message);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to send password reset email to " + toEmail, e);
+        }
+    }
 }

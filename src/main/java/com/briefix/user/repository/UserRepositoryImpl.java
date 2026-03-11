@@ -144,4 +144,9 @@ public class UserRepositoryImpl implements UserRepository {
     public Optional<User> findByVerificationToken(String verificationToken) {
         return jpaRepository.findByVerificationToken(verificationToken).map(userMapper::toModel);
     }
+
+    @Override
+    public Optional<User> findByPasswordResetToken(String passwordResetToken) {
+        return jpaRepository.findByPasswordResetToken(passwordResetToken).map(userMapper::toModel);
+    }
 }

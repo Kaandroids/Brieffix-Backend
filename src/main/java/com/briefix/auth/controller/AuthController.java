@@ -1,10 +1,12 @@
 package com.briefix.auth.controller;
 
 import com.briefix.auth.dto.AuthResponse;
+import com.briefix.auth.dto.ForgotPasswordRequest;
 import com.briefix.auth.dto.GoogleAuthRequest;
 import com.briefix.auth.dto.LoginRequest;
 import com.briefix.auth.dto.RefreshRequest;
 import com.briefix.auth.dto.RegisterRequest;
+import com.briefix.auth.dto.ResetPasswordRequest;
 import com.briefix.auth.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -149,5 +151,17 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshRequest request) {
         return ResponseEntity.ok(authService.refresh(request.refreshToken()));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request.email());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request.token(), request.newPassword());
+        return ResponseEntity.ok().build();
     }
 }
