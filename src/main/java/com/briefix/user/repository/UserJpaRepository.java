@@ -1,6 +1,8 @@
 package com.briefix.user.repository;
 
 import com.briefix.user.entity.UserEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
@@ -69,4 +71,6 @@ public interface UserJpaRepository extends JpaRepository<UserEntity, UUID> {
     Optional<UserEntity> findByVerificationToken(String verificationToken);
 
     Optional<UserEntity> findByPasswordResetToken(String passwordResetToken);
+
+    Page<UserEntity> findByEmailContainingIgnoreCase(String email, Pageable pageable);
 }

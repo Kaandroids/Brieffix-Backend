@@ -2,6 +2,7 @@ package com.briefix.user.dto;
 
 import com.briefix.user.model.AuthProvider;
 import com.briefix.user.model.UserPlan;
+import com.briefix.user.model.UserRole;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -39,6 +40,7 @@ public record UserDto(
         String fullName,
         String phone,
         UserPlan plan,
+        UserRole role,
         LocalDateTime createdAt,
         String billingName,
         String billingStreet,

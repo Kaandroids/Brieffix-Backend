@@ -46,9 +46,13 @@ app:
     login:
       max-requests: 10     # max login attempts per IP per window
       window-seconds: 60   # rolling window duration in seconds
+      burst-max-requests: 3  # max login attempts per IP within the burst window
+      burst-window-seconds: 5 # short burst window to prevent rapid-fire attacks
     register:
       max-requests: 5      # max registration attempts per IP per window
       window-seconds: 60
+      burst-max-requests: 2
+      burst-window-seconds: 10
 
   frontend-url: ${FRONTEND_URL:http://localhost:4200}
 

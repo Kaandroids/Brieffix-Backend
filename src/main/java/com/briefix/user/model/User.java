@@ -70,6 +70,8 @@ public record User(
 
         UserPlan plan,
 
+        UserRole role,
+
         LocalDateTime createdAt,
 
         String verificationToken,

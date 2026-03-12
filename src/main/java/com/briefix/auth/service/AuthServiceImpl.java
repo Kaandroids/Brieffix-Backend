@@ -17,6 +17,7 @@ import com.briefix.security.TokenBlacklistService;
 import com.briefix.user.model.AuthProvider;
 import com.briefix.user.model.User;
 import com.briefix.user.model.UserPlan;
+import com.briefix.user.model.UserRole;
 import com.briefix.user.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -171,6 +172,7 @@ public class AuthServiceImpl implements AuthService {
                 request.fullName(),
                 request.phone(),
                 UserPlan.STANDARD,
+                UserRole.ROLE_USER,
                 null,
                 token,
                 expiry,
@@ -308,6 +310,7 @@ public class AuthServiceImpl implements AuthService {
                 user.fullName(),
                 user.phone(),
                 user.plan(),
+                user.role(),
                 user.createdAt(),
                 null,
                 null,
@@ -360,7 +363,7 @@ public class AuthServiceImpl implements AuthService {
             var newUser = new User(
                 null, email, null, AuthProvider.GOOGLE, providerId,
                 true, fullName != null ? fullName : email, null,
-                UserPlan.STANDARD, null, null, null,
+                UserPlan.STANDARD, UserRole.ROLE_USER, null, null, null,
                 null, null,
                 null, null, null, null, null, null
             );
@@ -397,7 +400,7 @@ public class AuthServiceImpl implements AuthService {
 
             var updated = new User(
                     user.id(), user.email(), user.passwordHash(), user.provider(), user.providerId(),
-                    user.isEmailVerified(), user.fullName(), user.phone(), user.plan(), user.createdAt(),
+                    user.isEmailVerified(), user.fullName(), user.phone(), user.plan(), user.role(), user.createdAt(),
                     user.verificationToken(), user.verificationTokenExpiry(),
                     token, expiry,
                     user.billingName(), user.billingStreet(), user.billingStreetNo(),
@@ -424,7 +427,7 @@ public class AuthServiceImpl implements AuthService {
 
         var updated = new User(
                 user.id(), user.email(), passwordEncoder.encode(newPassword), user.provider(), user.providerId(),
-                user.isEmailVerified(), user.fullName(), user.phone(), user.plan(), user.createdAt(),
+                user.isEmailVerified(), user.fullName(), user.phone(), user.plan(), user.role(), user.createdAt(),
                 user.verificationToken(), user.verificationTokenExpiry(),
                 null, null,
                 user.billingName(), user.billingStreet(), user.billingStreetNo(),
@@ -482,6 +485,7 @@ public class AuthServiceImpl implements AuthService {
                     user.fullName(),
                     user.phone(),
                     user.plan(),
+                    user.role(),
                     user.createdAt(),
                     token,
                     expiry,

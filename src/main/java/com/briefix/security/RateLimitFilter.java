@@ -95,6 +95,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
     @Value("${app.rate-limit.login.window-seconds:60}")
     private int loginWindowSeconds;
 
+    /** Maximum number of rapid-fire login requests allowed per IP within the burst window. */
+    @Value("${app.rate-limit.login.burst-max-requests:3}")
+    private int loginBurstMaxRequests;
+
+    /** Duration of the short burst window in seconds for the login endpoint. */
+    @Value("${app.rate-limit.login.burst-window-seconds:5}")
+    private int loginBurstWindowSeconds;
+
     /** Maximum number of registration requests allowed per IP within the window. */
     @Value("${app.rate-limit.register.max-requests:5}")
     private int registerMaxRequests;
@@ -102,6 +110,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
     /** Duration of the fixed window in seconds for the register endpoint. */
     @Value("${app.rate-limit.register.window-seconds:60}")
     private int registerWindowSeconds;
+
+    /** Maximum number of rapid-fire registration requests allowed per IP within the burst window. */
+    @Value("${app.rate-limit.register.burst-max-requests:2}")
+    private int registerBurstMaxRequests;
+
+    /** Duration of the short burst window in seconds for the register endpoint. */
+    @Value("${app.rate-limit.register.burst-window-seconds:10}")
+    private int registerBurstWindowSeconds;
 
     /** Maximum number of public letter-preview requests allowed per IP per day. */
     @Value("${app.rate-limit.public-preview.max-requests:3}")
@@ -144,33 +160,52 @@ public class RateLimitFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         int maxRequests;
         int windowSeconds;
+        int burstMaxRequests;
+        int burstWindowSeconds;
 
         if (LOGIN_PATH.equals(path)) {
-            maxRequests   = loginMaxRequests;
-            windowSeconds = loginWindowSeconds;
+            maxRequests        = loginMaxRequests;
+            windowSeconds      = loginWindowSeconds;
+            burstMaxRequests   = loginBurstMaxRequests;
+            burstWindowSeconds = loginBurstWindowSeconds;
         } else if (REGISTER_PATH.equals(path)) {
-            maxRequests   = registerMaxRequests;
-            windowSeconds = registerWindowSeconds;
+            maxRequests        = registerMaxRequests;
+            windowSeconds      = registerWindowSeconds;
+            burstMaxRequests   = registerBurstMaxRequests;
+            burstWindowSeconds = registerBurstWindowSeconds;
         } else if (PUBLIC_PREVIEW_PATH.equals(path)) {
-            maxRequests   = publicPreviewMaxRequests;
-            windowSeconds = publicPreviewWindowSeconds;
+            maxRequests        = publicPreviewMaxRequests;
+            windowSeconds      = publicPreviewWindowSeconds;
+            burstMaxRequests   = publicPreviewMaxRequests;
+            burstWindowSeconds = publicPreviewWindowSeconds;
         } else {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String ip  = resolveClientIp(request);
-        String key = "rate_limit:" + path + ":" + ip;
+        String ip       = resolveClientIp(request);
+        String baseKey  = "rate_limit:" + path + ":" + ip;
+        String burstKey = "rate_limit:burst:" + path + ":" + ip;
 
-        Long count = redis.opsForValue().increment(key);
+        // Check long window
+        Long count = redis.opsForValue().increment(baseKey);
         if (count == null) count = 1L;
         if (count == 1) {
-            // Set the TTL only on the first increment so the window expires naturally.
-            redis.expire(key, windowSeconds, TimeUnit.SECONDS);
+            redis.expire(baseKey, windowSeconds, TimeUnit.SECONDS);
         }
-
         if (count > maxRequests) {
             rejectWithTooManyRequests(response, windowSeconds);
+            return;
+        }
+
+        // Check burst window
+        Long burstCount = redis.opsForValue().increment(burstKey);
+        if (burstCount == null) burstCount = 1L;
+        if (burstCount == 1) {
+            redis.expire(burstKey, burstWindowSeconds, TimeUnit.SECONDS);
+        }
+        if (burstCount > burstMaxRequests) {
+            rejectWithTooManyRequests(response, burstWindowSeconds);
             return;
         }
 

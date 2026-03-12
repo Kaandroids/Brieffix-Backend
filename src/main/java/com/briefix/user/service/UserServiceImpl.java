@@ -127,7 +127,7 @@ public class UserServiceImpl implements UserService {
                           String billingName, String billingStreet, String billingStreetNo,
                           String billingZip, String billingCity, String billingCountry) {
         return new User(u.id(), u.email(), passwordHash, u.provider(), u.providerId(),
-                u.isEmailVerified(), fullName, phone, u.plan(), u.createdAt(),
+                u.isEmailVerified(), fullName, phone, u.plan(), u.role(), u.createdAt(),
                 u.verificationToken(), u.verificationTokenExpiry(),
                 u.passwordResetToken(), u.passwordResetTokenExpiry(),
                 billingName, billingStreet, billingStreetNo, billingZip, billingCity, billingCountry);

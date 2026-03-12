@@ -2,6 +2,7 @@ package com.briefix.user.entity;
 
 import com.briefix.user.model.AuthProvider;
 import com.briefix.user.model.UserPlan;
+import com.briefix.user.model.UserRole;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -96,6 +97,10 @@ public class UserEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "varchar(255) default 'STANDARD'")
     private UserPlan plan = UserPlan.STANDARD;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "varchar(255) default 'ROLE_USER'")
+    private UserRole role = UserRole.ROLE_USER;
 
     /**
      * The timestamp at which this user record was first persisted. Set automatically
@@ -299,6 +304,9 @@ public class UserEntity {
      * @param plan the {@link UserPlan} to assign; must not be {@code null}
      */
     public void setPlan(UserPlan plan) { this.plan = plan; }
+
+    public UserRole getRole() { return role; }
+    public void setRole(UserRole role) { this.role = role; }
 
     /**
      * Sets the creation timestamp. Normally managed automatically by {@link #onCreate()};

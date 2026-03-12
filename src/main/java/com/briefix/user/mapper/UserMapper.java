@@ -44,6 +44,7 @@ public class UserMapper {
                 user.fullName(),
                 user.phone(),
                 user.plan(),
+                user.role(),
                 user.createdAt(),
                 user.billingName(),
                 user.billingStreet(),
@@ -75,6 +76,7 @@ public class UserMapper {
                 entity.getFullName(),
                 entity.getPhone(),
                 entity.getPlan(),
+                entity.getRole(),
                 entity.getCreatedAt(),
                 entity.getVerificationToken(),
                 entity.getVerificationTokenExpiry(),
@@ -113,6 +115,7 @@ public class UserMapper {
         entity.setFullName(user.fullName());
         entity.setPhone(user.phone());
         entity.setPlan(user.plan());
+        entity.setRole(user.role());
         entity.setCreatedAt(user.createdAt());
         entity.setVerificationToken(user.verificationToken());
         entity.setVerificationTokenExpiry(user.verificationTokenExpiry());

@@ -70,7 +70,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .map(entity -> new User(
                         entity.getEmail(),
                         entity.getPasswordHash() != null ? entity.getPasswordHash() : "",
-                        List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                        List.of(new SimpleGrantedAuthority(entity.getRole().name()))
                 ))
                 .orElseThrow(() -> new UsernameNotFoundException("No account found for email: " + email));
     }
